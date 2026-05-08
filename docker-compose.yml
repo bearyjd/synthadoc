@@ -1,0 +1,39 @@
+# docker-compose.yml — Synthadoc local deployment
+#
+# Quick start:
+#   cp .env.example .env   # add your API key(s)
+#   docker compose up -d
+
+services:
+  synthadoc:
+    image: ghcr.io/axoviq-ai/synthadoc:latest
+    # build:
+    #   context: .
+    #   target: base
+    container_name: synthadoc
+    restart: unless-stopped
+    ports:
+      - "${WIKI_PORT:-7070}:${WIKI_PORT:-7070}"
+    volumes:
+      - synthadoc-wikis:/wikis
+      # Optional: bind-mount to a host path
+      # - /mnt/nas/synthadoc/wikis:/wikis
+    environment:
+      WIKI_NAME: "${WIKI_NAME:-main}"
+      WIKI_DOMAIN: "${WIKI_DOMAIN:-Personal knowledge base}"
+      WIKI_PORT: "${WIKI_PORT:-7070}"
+      SYNTHADOC_PROVIDER: "${SYNTHADOC_PROVIDER:-}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
+      GROQ_API_KEY: "${GROQ_API_KEY:-}"
+      TAVILY_API_KEY: "${TAVILY_API_KEY:-}"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:${WIKI_PORT:-7070}/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  synthadoc-wikis:
