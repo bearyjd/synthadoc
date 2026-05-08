@@ -76,14 +76,15 @@ docker run -d \
 | `WIKI_NAME` | `main` | Wiki identifier; maps to `/wikis/<WIKI_NAME>` |
 | `WIKI_DOMAIN` | `Personal knowledge base` | Domain hint used when scaffolding a new wiki |
 | `WIKI_PORT` | `7070` | Port the server listens on inside the container |
+| `SYNTHADOC_PROVIDER` | _(config.toml default)_ | Override the LLM provider for this session. Use `claude-code` to route through a local Claude Code session with no API key. Other options: `anthropic`, `openai`, `groq`. |
 | `ANTHROPIC_API_KEY` | _(none)_ | Anthropic provider key |
 | `OPENAI_API_KEY` | _(none)_ | OpenAI provider key |
 | `GEMINI_API_KEY` | _(none)_ | Google Gemini provider key |
 | `GROQ_API_KEY` | _(none)_ | Groq provider key |
 | `TAVILY_API_KEY` | _(none)_ | Enables web-search ingestion |
 
-At least one LLM key is required for ingest and query to work. The container will
-start without one but will emit a warning and fail on those operations.
+At least one LLM key is required unless `SYNTHADOC_PROVIDER=claude-code` is set,
+which routes all LLM calls through a local Claude Code session and needs no API key.
 
 ---
 

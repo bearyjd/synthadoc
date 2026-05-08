@@ -15,9 +15,13 @@ WIKI_NAME="${WIKI_NAME:-main}"
 WIKI_DIR="/wikis/${WIKI_NAME}"
 WIKI_DOMAIN="${WIKI_DOMAIN:-Personal knowledge base}"
 WIKI_PORT="${WIKI_PORT:-7070}"
+SYNTHADOC_PROVIDER="${SYNTHADOC_PROVIDER:-}"
 
 # ── Validate at least one LLM key is present ──────────────
-if [[ -z "${ANTHROPIC_API_KEY:-}" && \
+# Skip when using a local provider that doesn't need an API key
+if [[ "${SYNTHADOC_PROVIDER}" != "claude-code" && \
+      "${SYNTHADOC_PROVIDER}" != "opencode" && \
+      -z "${ANTHROPIC_API_KEY:-}" && \
       -z "${OPENAI_API_KEY:-}" && \
       -z "${GEMINI_API_KEY:-}" && \
       -z "${GROQ_API_KEY:-}" ]]; then
@@ -54,7 +58,14 @@ PYEOF
 fi
 
 # ── Start server ──────────────────────────────────────────
-echo "[entrypoint] Starting synthadoc serve -w ${WIKI_NAME} --port ${WIKI_PORT}"
+PROVIDER_ARGS=()
+if [[ -n "${SYNTHADOC_PROVIDER}" ]]; then
+  PROVIDER_ARGS=(--provider "${SYNTHADOC_PROVIDER}")
+  echo "[entrypoint] Starting synthadoc serve -w ${WIKI_NAME} --port ${WIKI_PORT} --provider ${SYNTHADOC_PROVIDER}"
+else
+  echo "[entrypoint] Starting synthadoc serve -w ${WIKI_NAME} --port ${WIKI_PORT}"
+fi
 exec synthadoc serve \
   -w "${WIKI_NAME}" \
-  --port "${WIKI_PORT}"
+  --port "${WIKI_PORT}" \
+  "${PROVIDER_ARGS[@]}"

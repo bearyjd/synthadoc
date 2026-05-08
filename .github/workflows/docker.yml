@@ -138,6 +138,7 @@ jobs:
             -e WIKI_NAME=smoke \
             -e WIKI_DOMAIN="Smoke test wiki" \
             -e WIKI_PORT=7070 \
+            -e GEMINI_API_KEY=smoke-ci-placeholder \
             ghcr.io/${{ env.IMAGE_NAME }}:edge
 
           healthy=false

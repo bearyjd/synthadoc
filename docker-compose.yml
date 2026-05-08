@@ -22,6 +22,7 @@ services:
       WIKI_NAME: "${WIKI_NAME:-main}"
       WIKI_DOMAIN: "${WIKI_DOMAIN:-Personal knowledge base}"
       WIKI_PORT: "${WIKI_PORT:-7070}"
+      SYNTHADOC_PROVIDER: "${SYNTHADOC_PROVIDER:-}"
       ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
       OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
       GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
