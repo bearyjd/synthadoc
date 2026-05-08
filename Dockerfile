@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /build
 
 COPY pyproject.toml ./
-COPY synthadoc/__init__.py synthadoc/__init__.py
+COPY synthadoc/ synthadoc/
 COPY VERSION ./
 
 RUN pip install --upgrade pip hatchling && \
@@ -50,6 +50,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libffi8 \
         libssl3 \
         ca-certificates \
+        curl \
         tini \
     && rm -rf /var/lib/apt/lists/*
 
@@ -59,12 +60,13 @@ RUN groupadd --gid 1001 synthadoc && \
 WORKDIR /app
 
 COPY --from=builder /wheels /wheels
+COPY VERSION ./
 RUN pip install --no-cache-dir --no-index --find-links /wheels synthadoc && \
+    cp VERSION "$(python3 -c 'import site; print(site.getsitepackages()[0])')/VERSION" && \
     rm -rf /wheels
 
 COPY synthadoc/ synthadoc/
 COPY hooks/ hooks/
-COPY VERSION ./
 
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

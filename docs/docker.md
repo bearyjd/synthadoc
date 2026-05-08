@@ -103,8 +103,14 @@ volumes:
 ```
 
 Ensure the host path is writable by UID 1001 (the `synthadoc` user inside the
-container):
+container).
 
+With **rootless Podman** (no sudo required):
+```bash
+podman unshare chown 1001:1001 /mnt/nas/synthadoc/wikis
+```
+
+With **Docker / rootful Podman**:
 ```bash
 sudo chown -R 1001:1001 /mnt/nas/synthadoc/wikis
 ```
