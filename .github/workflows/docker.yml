@@ -132,9 +132,10 @@ jobs:
 
       - name: /health responds 200
         run: |
+          # Server binds to 127.0.0.1 inside the container (localhost-only by design).
+          # Use docker exec to curl from inside the container rather than from the host.
           docker run -d \
             --name synthadoc-smoke \
-            -p 7070:7070 \
             -e WIKI_NAME=smoke \
             -e WIKI_DOMAIN="Smoke test wiki" \
             -e WIKI_PORT=7070 \
@@ -143,7 +144,7 @@ jobs:
 
           healthy=false
           for i in $(seq 1 15); do
-            if curl -sf http://localhost:7070/health; then
+            if docker exec synthadoc-smoke curl -sf http://127.0.0.1:7070/health 2>/dev/null; then
               echo "✓ /health OK"
               healthy=true
               break
