@@ -120,6 +120,16 @@ jobs:
             ghcr.io/${{ env.IMAGE_NAME }}:edge \
             --version
 
+      - name: Pull vectors image
+        run: docker pull ghcr.io/${{ env.IMAGE_NAME }}:edge-vectors
+
+      - name: synthadoc --version (vectors)
+        run: |
+          docker run --rm \
+            --entrypoint synthadoc \
+            ghcr.io/${{ env.IMAGE_NAME }}:edge-vectors \
+            --version
+
       - name: /health responds 200
         run: |
           docker run -d \
@@ -130,9 +140,11 @@ jobs:
             -e WIKI_PORT=7070 \
             ghcr.io/${{ env.IMAGE_NAME }}:edge
 
+          healthy=false
           for i in $(seq 1 15); do
             if curl -sf http://localhost:7070/health; then
               echo "✓ /health OK"
+              healthy=true
               break
             fi
             echo "Waiting... ($i/15)"
@@ -141,3 +153,5 @@ jobs:
 
           docker logs synthadoc-smoke
           docker stop synthadoc-smoke
+
+          $healthy || { echo "✗ /health never responded"; exit 1; }

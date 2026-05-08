@@ -34,7 +34,16 @@ RUN pip install --upgrade pip hatchling && \
 # ── Stage 2: vectors builder (optional target) ─────────────
 FROM builder AS vectors-builder
 
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal
+RUN set -eux; \
+    RUSTUP_VERSION=1.27.1; \
+    ARCH="$(uname -m)-unknown-linux-gnu"; \
+    curl -sSfL -o rustup-init \
+      "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/${ARCH}/rustup-init"; \
+    curl -sSfL -o rustup-init.sha256 \
+      "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/${ARCH}/rustup-init.sha256"; \
+    sha256sum -c rustup-init.sha256; \
+    chmod +x rustup-init && ./rustup-init -y --profile minimal; \
+    rm rustup-init rustup-init.sha256
 ENV PATH="/root/.cargo/bin:${PATH}"
 
 RUN pip wheel --no-cache-dir --wheel-dir /wheels ".[vectors]"
@@ -62,10 +71,11 @@ WORKDIR /app
 COPY --from=builder /wheels /wheels
 COPY VERSION ./
 RUN pip install --no-cache-dir --no-index --find-links /wheels synthadoc && \
+    # Workaround: __init__.py reads VERSION via path lookup, not importlib.metadata.
+    # Fix upstream: add VERSION to wheel package_data and use importlib.metadata.version().
     cp VERSION "$(python3 -c 'import site; print(site.getsitepackages()[0])')/VERSION" && \
     rm -rf /wheels
 
-COPY synthadoc/ synthadoc/
 COPY hooks/ hooks/
 
 COPY docker/entrypoint.sh /entrypoint.sh

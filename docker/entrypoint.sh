@@ -29,13 +29,28 @@ fi
 # ── First-run: initialise the wiki ────────────────────────
 if [[ ! -d "${WIKI_DIR}/.synthadoc" ]]; then
   echo "[entrypoint] Wiki '${WIKI_NAME}' not found — initialising..."
-  synthadoc install "${WIKI_NAME}" \
-    --target /wikis \
-    --domain "${WIKI_DOMAIN}" \
-    --port "${WIKI_PORT}"
+  if ! synthadoc install "${WIKI_NAME}" \
+      --target /wikis \
+      --domain "${WIKI_DOMAIN}" \
+      --port "${WIKI_PORT}"; then
+    echo "[entrypoint] ERROR: install failed — check /wikis is writable and config is valid" >&2
+    exit 1
+  fi
   echo "[entrypoint] Wiki initialised at ${WIKI_DIR}"
 else
-  echo "[entrypoint] Wiki '${WIKI_NAME}' found at ${WIKI_DIR}"
+  echo "[entrypoint] Wiki '${WIKI_NAME}' found at ${WIKI_DIR} — re-registering in local registry..."
+  # The registry (~/.synthadoc/wikis.json) is ephemeral per container start.
+  # Re-register the existing wiki so synthadoc serve can resolve it by name.
+  python3 - <<PYEOF
+import json
+from pathlib import Path
+from datetime import date
+reg = Path.home() / ".synthadoc" / "wikis.json"
+reg.parent.mkdir(parents=True, exist_ok=True)
+registry = json.loads(reg.read_text()) if reg.exists() else {}
+registry["${WIKI_NAME}"] = {"path": "${WIKI_DIR}", "demo": None, "installed": date.today().isoformat()}
+reg.write_text(json.dumps(registry, indent=2))
+PYEOF
 fi
 
 # ── Start server ──────────────────────────────────────────
