@@ -1,0 +1,38 @@
+name: Sync fork with upstream
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # daily at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: Merge upstream/main → fork/main
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout fork main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add upstream remote and fetch
+        run: |
+          git remote add upstream https://github.com/axoviq-ai/synthadoc.git
+          git fetch upstream main
+
+      - name: Fast-forward merge upstream/main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git merge --ff-only upstream/main || {
+            echo "::warning::upstream/main has diverged from fork/main — manual merge required"
+            exit 1
+          }
+
+      - name: Push to fork
+        run: git push origin main
