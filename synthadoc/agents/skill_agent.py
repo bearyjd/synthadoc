@@ -193,7 +193,7 @@ class SkillAgent:
         # Normalise backslash URLs so Windows-pasted forms (e.g. "https:\example.com\path")
         # are not mistakenly resolved as local filesystem paths.
         s = _normalize_url(source).lower()
-        if s.startswith(("http://", "https://")):
+        if "://" in s:
             return False
         try:
             meta = self.detect_skill(source)

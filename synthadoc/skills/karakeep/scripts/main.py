@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Literal
@@ -215,7 +214,18 @@ class KarakeepSkill(BaseSkill):
             )
 
         prefer_archived = os.environ.get("KARAKEEP_ARCHIVED_CONTENT", "true").lower() != "false"
-        tmp_dir = Path(tempfile.mkdtemp(prefix="karakeep-"))
+
+        # Write staging files inside wiki raw_sources/ so ingest_agent path check passes.
+        # SYNTHADOC_WIKI_ROOT is set by http_server.py before any skill runs.
+        wiki_root_env = os.environ.get("SYNTHADOC_WIKI_ROOT", "")
+        if not wiki_root_env:
+            raise EnvironmentError(
+                "[ERR-SKILL-KAR-006] SYNTHADOC_WIKI_ROOT is not set. "
+                "Run this skill via synthadoc serve, not directly."
+            )
+        tmp_dir = Path(wiki_root_env) / "raw_sources" / "karakeep"
+        tmp_dir.mkdir(parents=True, exist_ok=True)
+
         child_sources: list[str] = []
 
         async with KarakeepClient(url, api_key) as client:
