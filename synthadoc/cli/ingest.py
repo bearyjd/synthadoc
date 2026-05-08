@@ -24,8 +24,8 @@ def _validate_source(source: str) -> None:
     """Fail early if source is not a URL, an intent phrase, or an existing file path."""
     from synthadoc import errors as E
     s = source.strip()
-    if s.startswith(("http://", "https://")):
-        return  # URL — valid
+    if "://" in s:
+        return  # URL or custom skill scheme — valid
     lower = s.lower()
     if any(lower.startswith(p) for p in _INTENT_PREFIXES):
         return  # Intent phrase — valid
@@ -86,8 +86,8 @@ def ingest_cmd(
         if not s or s.startswith("#"):
             continue
         lower_s = s.lower()
-        if s.startswith(("http://", "https://")) or any(lower_s.startswith(p) for p in _INTENT_PREFIXES):
-            abs_source = s  # URLs and intent phrases are passed as-is to the server
+        if "://" in s or any(lower_s.startswith(p) for p in _INTENT_PREFIXES):
+            abs_source = s  # URLs, custom skill schemes, and intent phrases passed as-is
         else:
             abs_source = str(Path(s).resolve())
         if analyse_only:

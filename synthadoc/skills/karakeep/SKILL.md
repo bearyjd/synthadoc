@@ -8,10 +8,7 @@ entry:
 triggers:
   extensions:
     - "karakeep://"
-  intents:
-    - "karakeep"
-    - "import bookmarks"
-    - "karakeep vault"
+  intents: []
 requires:
   - httpx
   - pydantic
