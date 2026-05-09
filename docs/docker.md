@@ -116,6 +116,13 @@ With **Docker / rootful Podman**:
 sudo chown -R 1001:1001 /mnt/nas/synthadoc/wikis
 ```
 
+**SELinux (Fedora / RHEL):** append `:Z` to the volume mount so Podman relabels the directory for the container:
+```yaml
+volumes:
+  - /mnt/nas/synthadoc/wikis:/wikis:Z
+```
+Without `:Z`, SELinux blocks writes even when the directory is owned by the correct UID.
+
 ---
 
 ## Multi-wiki pattern
