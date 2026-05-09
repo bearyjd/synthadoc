@@ -29,10 +29,18 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git merge --ff-only upstream/main || {
-            echo "::warning::upstream/main has diverged from fork/main — manual merge required"
+          BEHIND=$(git rev-list --count HEAD..upstream/main)
+          if [ "$BEHIND" = "0" ]; then
+            echo "Fork is already up to date with upstream — nothing to merge"
+            exit 0
+          fi
+          AHEAD=$(git rev-list --count upstream/main..HEAD)
+          if [ "$AHEAD" != "0" ]; then
+            echo "::warning::Fork is $AHEAD commits ahead and $BEHIND commits behind upstream — manual merge required"
             exit 1
-          }
+          fi
+          git merge --ff-only upstream/main
 
       - name: Push to fork
+        if: ${{ success() }}
         run: git push origin main
