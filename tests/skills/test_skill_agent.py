@@ -254,3 +254,25 @@ def test_youtube_url_still_routes_to_youtube_skill_not_web_search(tmp_wiki):
     assert agent.detect_skill("https://www.youtube.com/watch?v=O5nskjZ_GoI").name == "youtube"
     assert agent.detect_skill("https://youtu.be/O5nskjZ_GoI").name == "youtube"
     assert agent.detect_skill("https://www.youtubekids.com/watch?v=abc").name == "youtube"
+
+
+# ── Karakeep custom scheme routing ────────────────────────────────────────────
+
+def test_needs_path_resolution_returns_false_for_karakeep_uri(tmp_wiki):
+    """karakeep:// URIs must never be resolved as local filesystem paths."""
+    from synthadoc.agents.skill_agent import SkillAgent
+    agent = SkillAgent(wiki_root=tmp_wiki)
+    assert agent.needs_path_resolution("karakeep://all") is False
+    assert agent.needs_path_resolution("karakeep://lists/abc-123") is False
+    assert agent.needs_path_resolution("karakeep://tags/python") is False
+    assert agent.needs_path_resolution("karakeep://bookmark/xyz") is False
+
+
+def test_detect_skill_routes_karakeep_uri(tmp_wiki):
+    """karakeep:// URIs must be dispatched to the karakeep built-in skill."""
+    from synthadoc.agents.skill_agent import SkillAgent
+    agent = SkillAgent(wiki_root=tmp_wiki)
+    assert agent.detect_skill("karakeep://all").name == "karakeep"
+    assert agent.detect_skill("karakeep://lists/some-list-id").name == "karakeep"
+    assert agent.detect_skill("karakeep://tags/ai").name == "karakeep"
+    assert agent.detect_skill("karakeep://bookmark/bm-abc").name == "karakeep"
