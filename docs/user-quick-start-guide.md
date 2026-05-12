@@ -1,9 +1,9 @@
 ﻿# Synthadoc User Quick-Start Guide
 
-**Version: v0.3.0 (Community Edition)**
+**Version: v0.4.0 (Community Edition)**
 
 This guide walks you through the **History of Computing** demo wiki — a fully wired
-Synthadoc environment with 10 pre-built pages and six raw source files that cover every
+Synthadoc environment with 13 pre-built pages and six raw source files that cover every
 major engine feature. No setup beyond following the steps below is required.
 
 > **Before you start:** complete [README Installation Steps 1–6](../README.md#installation)
@@ -15,8 +15,8 @@ major engine feature. No setup beyond following the steps below is required.
 ## Table of Contents
 
 1. [Verify the demo server has started](#step-1--verify-the-demo-server-has-started)
-2. [Install Dataview in Obsidian](#step-2--install-dataview-in-obsidian)
-3. [Install the Synthadoc plugin and open the vault](#step-3--install-the-synthadoc-plugin-and-open-the-vault)
+2. [Install the Synthadoc plugin](#step-2--install-the-synthadoc-plugin)
+3. [Open the vault in Obsidian](#step-3--open-the-vault-in-obsidian)
 4. [Review the wiki structure and key files](#step-4--review-the-wiki-structure-and-key-files)
 5. [Query the pre-built wiki (CLI + Obsidian)](#step-5--query-the-pre-built-wiki-cli--obsidian)
 6. [Batch ingest all demo sources](#step-6--batch-ingest-all-demo-sources)
@@ -57,7 +57,7 @@ Expected output:
 
 ```
 Wiki:         /home/user/wikis/history-of-computing
-Pages:        12
+Pages:        13
 Jobs pending: 0
 Jobs total:   0
 ```
@@ -107,88 +107,66 @@ synthadoc use
 
 ---
 
-## Step 2 — Install Dataview in Obsidian
+## Step 2 — Install the Synthadoc plugin
 
-Obsidian is a free, local-first knowledge management app — all notes are plain Markdown
-on your machine. Synthadoc writes its wiki pages in Obsidian-compatible format, so you
-can browse and search the wiki without any tool running.
+The plugin ships pre-built — no build step required. Run this command before opening
+Obsidian — it copies the plugin files directly into the vault's plugins folder:
+
+```bash
+synthadoc plugin install history-of-computing
+```
+
+> **Note:** The wiki must be registered first via `synthadoc install` before running
+> this command. The installer looks up the wiki's path from the registry.
+
+That's it for the CLI steps. Now open Obsidian.
+
+---
+
+## Step 3 — Open the vault in Obsidian
 
 **Obsidian must already be installed** — download from **[obsidian.md](https://obsidian.md)** if not.
 
-### Open the vault
+### 1. Open the vault
 
 In Obsidian: **Open folder as vault** → select the installed wiki folder:
 
 - **Windows:** `%USERPROFILE%\wikis\history-of-computing`
 - **Linux / macOS:** `~/wikis/history-of-computing`
 
-> **Tip — show all file types in the explorer:** By default Obsidian hides file types it
-> does not natively understand (`.xlsx`, `.pptx`, etc.). To show them: **Settings →
-> Files and links → Show all file types → on**. The engine reads them regardless.
+> **Tip — show all file types:** By default Obsidian hides file types it does not
+> natively understand (`.xlsx`, `.pptx`, etc.). To show them: **Settings → Files and
+> links → Show all file types → on**.
 
-**Dataview** is an Obsidian community plugin that provides SQL-like live queries over
-YAML frontmatter. The Synthadoc dashboard (`wiki/dashboard.md`) uses it to display
-contradicted pages and orphans in real time.
+### 2. Install Dataview
 
-**Install Dataview:**
+**Dataview** is an Obsidian community plugin that powers the live dashboard in `wiki/dashboard.md`.
 
-1. Open Obsidian → **Settings** (gear icon, bottom-left) → **Community plugins**
+1. **Settings** (gear icon, bottom-left) → **Community plugins**
 2. Toggle **Turn on community plugins** if it is off
 3. Click **Browse** → search `Dataview` → **Install** → **Enable**
 4. Close settings
 
-> **Dataview cache:** Dataview caches frontmatter and may not immediately reflect changes
-> made by Synthadoc. If the dashboard disagrees with `synthadoc lint report`, drop the
-> cache: `Ctrl/Cmd+P` → **Dataview: Drop all cached file metadata**, then reopen the
-> dashboard. The CLI report reads files directly and is always authoritative.
+### 3. Enable the Synthadoc plugin
 
----
-
-## Step 3 — Install the Synthadoc plugin and open the vault
-
-### Install the Synthadoc plugin
-
-The plugin ships pre-built as `obsidian-plugin/main.js` — no build step required.
-
-From the `obsidian-plugin/` folder inside your cloned Synthadoc repo:
-
-**Linux / macOS:**
-
-```bash
-vault=~/wikis/history-of-computing
-mkdir -p "$vault/.obsidian/plugins/synthadoc"
-cp main.js manifest.json "$vault/.obsidian/plugins/synthadoc/"
-```
-
-**Windows (cmd.exe):**
-
-```cmd
-mkdir "%USERPROFILE%\wikis\history-of-computing\.obsidian\plugins\synthadoc"
-copy main.js "%USERPROFILE%\wikis\history-of-computing\.obsidian\plugins\synthadoc\"
-copy manifest.json "%USERPROFILE%\wikis\history-of-computing\.obsidian\plugins\synthadoc\"
-```
-
-### Enable and configure the plugin
-
-**Fully quit and reopen Obsidian** — the plugin will not appear until Obsidian restarts.
+The plugin files are already in place from Step 2. Obsidian just needs to activate them:
 
 1. **Settings → Community plugins** → find **Synthadoc** → toggle **on**
 2. Click the gear icon next to the Synthadoc entry
 3. Set **Server URL** to `http://127.0.0.1:7070`
-   (change only if you configured a different port)
-4. Leave **Raw sources folder** as `raw_sources`
-5. Close settings
+4. Close settings
 
 The **Synthadoc ribbon icon** (book icon on the far-left sidebar) confirms the plugin is
-active. Clicking it shows the live page count and server health.
+active. All Synthadoc commands are reachable via the Command Palette (`Ctrl/Cmd+P` →
+type `Synthadoc`).
 
 ![Synthadoc ribbon icon](png/synthadoc-ribbon-icon.png)
 
-All Synthadoc commands are also reachable via the Command Palette (`Ctrl/Cmd+P` → type
-`Synthadoc`). For the full command reference see
-[Appendix A — Obsidian Plugin Command Reference](#appendix-a--obsidian-plugin-command-reference).
-
 ![Obsidian vault with pre-built wiki](png/synthadoc-vault-demo.png)
+
+> **Dataview cache:** If the dashboard disagrees with `synthadoc lint report`, drop the
+> cache: `Ctrl/Cmd+P` → **Dataview: Drop all cached file metadata**, then reopen the
+> dashboard. The CLI report is always authoritative.
 
 ---
 
@@ -204,7 +182,7 @@ history-of-computing/
     purpose.md            ← scope definition — what belongs in this wiki and what to skip
     overview.md           ← LLM-generated 2-paragraph summary of the entire wiki
     alan-turing.md        ← example pre-built topic page
-    grace-hopper.md       ← ...and so on for each of the 10 pre-built pages
+    grace-hopper.md       ← ...and so on for each of the 13 pre-built pages
   raw_sources/            ← source documents to ingest (PDF, PPTX, XLSX, PNG, MD)
   AGENTS.md               ← LLM instructions — domain guidelines for ingest and query
   log.md                  ← human-readable activity log of every ingest and lint event
@@ -309,6 +287,37 @@ question → press `Ctrl/Cmd+Enter`. The answer appears in a responsive modal wi
 clickable `[[wikilinks]]`.
 
 ![Obsidian query modal with answer](png/ui-gap-detection.png)
+
+### Aliases — alternative names for a page
+
+Every wiki page (pre-built or ingest-created) has an `aliases` field in its frontmatter.
+It starts empty and is visible in Obsidian's **Properties** panel. Add alternative
+names or abbreviations so the query engine can match them without knowing the exact page title.
+
+**Try it now with `wiki/alan-turing.md`:**
+
+1. Open `wiki/alan-turing.md` in Obsidian
+2. In the **Properties** panel, click the `aliases` field and add one or more names:
+
+```yaml
+---
+title: Alan Turing
+aliases:
+  - Turing
+  - father of computer science
+  - Turing machine inventor
+---
+```
+
+3. Save the file, then query using an alias instead of the page title:
+
+```bash
+synthadoc query "What did Turing contribute to computing?"
+# "Turing" expands to the alan-turing slug before BM25 runs
+```
+
+Aliases are matched case-insensitively. Longest match wins — so if two pages each define
+an alias and one is a longer substring of the query, the longer one takes precedence.
 
 ---
 
@@ -479,6 +488,24 @@ pull in a fresh source via web search:
 synthadoc ingest "search for: Ada Lovelace contributions to computing history"
 ```
 
+### Deleting a page and cleaning up its references
+
+When you delete a wiki page from Obsidian, any `[[wikilinks]]` pointing to it in other
+pages become dangling references. Run lint to remove them automatically:
+
+```bash
+synthadoc lint run
+```
+
+Lint scans every page for links whose target no longer exists:
+
+- **List items** whose only content is the dangling link are removed entirely, e.g.
+  `- [[deleted-page]] — some description` disappears from the page.
+- **Inline references** such as `as described in [[deleted-page]]` are unlinked — the
+  brackets are stripped and the display text is kept.
+
+The number of pages cleaned up is shown in the lint output and recorded in `log.md`.
+
 ---
 
 ## Step 9 — Web search ingestion
@@ -486,17 +513,9 @@ synthadoc ingest "search for: Ada Lovelace contributions to computing history"
 > **Requires `TAVILY_API_KEY`** — see [Appendix D](#appendix-d--tavily-web-search-key).
 > Without it, web search jobs fail with `[ERR-SKILL-004]`. All other features work normally.
 
-### What's new in v0.3.0
+### How web search decomposition works
 
-- **Coding tool CLI providers** — set `provider = "claude-code"` or `provider = "opencode"` in `config.toml` to run all agents using your existing Claude Code or Opencode subscription, with no separate API key required. See [Appendix G](#appendix-g--using-claude-code-or-opencode-as-llm-provider) for setup.
-- **YouTube transcript ingest** — ingest any YouTube video (standard or Shorts) by URL. Captions are extracted automatically with no API key, and each page opens with an LLM-generated executive summary followed by a timestamped transcript.
-- **Knowledge gap detection** — improved reliability across multi-aspect queries; CJK (Chinese, Japanese, Korean) queries no longer produce false gap reports.
-- **Session wiki resolution** — `synthadoc use <name>` saves your active wiki so `-w` is optional on every subsequent command.
-- **DeepSeek provider** — eighth LLM provider added; very low text-only rates.
-
-### What's new in v0.2.0
-
-Synthadoc now **decomposes web search topics** into multiple focused keyword sub-queries
+Synthadoc **decomposes web search topics** into multiple focused keyword sub-queries
 before hitting Tavily. Each sub-query fires a separate parallel search, URLs are
 deduplicated across all results, and each is enqueued as an individual ingest job.
 This produces richer, more targeted pages than a single broad search.
@@ -591,12 +610,11 @@ The modal prepends `search for:` automatically — just type the topic, no prefi
 ## Step 10 — Ingest a YouTube video
 
 Pass any YouTube URL directly — the transcript is extracted automatically from the
-YouTube caption system (no API key, no audio download). Standard videos and **YouTube
-Shorts** (`https://www.youtube.com/shorts/...`) are both supported:
+YouTube caption system (no API key, no audio download). Both the full URL and the
+short-link form (`https://youtu.be/...`) are accepted:
 
 ```bash
 synthadoc ingest "https://www.youtube.com/watch?v=O5nskjZ_GoI"
-synthadoc ingest "https://youtu.be/O5nskjZ_GoI"              # short-link form
 ```
 
 This ingests *Early Computing: Crash Course Computer Science #1*, which covers Hollerith,
@@ -820,6 +838,8 @@ into named topic branches so queries only search the most relevant slice — red
 improving retrieval precision, and significantly cutting search latency on large wikis (see
 [Appendix H](#appendix-h--bm25-routing-performance-benchmarks) for measured results).
 
+![ROUTING.md scoped query flow](png/synthadoc-routing.png)
+
 ### Generate ROUTING.md from your current index
 
 ```bash
@@ -922,6 +942,8 @@ Candidates (3):
   punch-card-era                   confidence: low      ingested: 2026-05-06T14:22:45
   vacuum-tube-computers            confidence: medium   ingested: 2026-05-06T14:23:01
 ```
+
+![Candidates list in Obsidian](png/synthadoc-candidates.png)
 
 ### Promote or discard
 
@@ -1166,8 +1188,12 @@ Switch by editing `<wiki-root>/.synthadoc/config.toml` and restarting the server
 | `groq`      | `GROQ_API_KEY`      | Yes — fast Llama, 100K tokens/day           | No              |
 | `ollama`    | _(none)_            | Yes — fully local, no rate limits           | Model-dependent |
 | `minimax`   | `MINIMAX_API_KEY`   | No — cheapest paid text rates               | No              |
-| `anthropic` | `ANTHROPIC_API_KEY` | No — highest quality, pay-per-token         | Yes             |
-| `openai`    | `OPENAI_API_KEY`    | No — pay-per-token                          | Yes             |
+| `anthropic`   | `ANTHROPIC_API_KEY` | No — highest quality, pay-per-token                   | Yes             |
+| `openai`      | `OPENAI_API_KEY`    | No — pay-per-token                                    | Yes             |
+| `claude-code` | _(none)_            | Yes — uses your Claude Code subscription, no key      | Yes             |
+| `opencode`    | _(none)_            | Yes — uses your Opencode subscription, no key         | No              |
+
+> CLI providers (`claude-code`, `opencode`) require no API key but need the tool installed and authenticated in your terminal. Web search still requires `TAVILY_API_KEY`. See [Appendix G](#appendix-g--using-a-coding-tool-as-your-llm-provider) for setup details.
 
 **Change the provider** — edit `.synthadoc/config.toml`:
 
@@ -1374,6 +1400,10 @@ The `model` field is optional — if omitted, the tool uses its own configured d
 
 Ensure the tool is installed and authenticated in your terminal before starting the server. No environment variables are required.
 
+![Switching LLM providers in config.toml — Claude Code enabled](png/synthadoc-switch-provider.png)
+
+> **Web search still needs Tavily.** Even with a CLI provider, `search for:` ingest requires a `TAVILY_API_KEY`. The free tier (1,000 searches/month, no credit card required) is more than enough for typical Synthadoc use — see [Appendix D](#appendix-d--tavily-web-search-key).
+
 > **Note:** CLI providers use BM25 search only — vector/semantic search (`[search] vector = true`) is not supported and will be silently bypassed.
 
 ### Demo: ingest + query
@@ -1427,8 +1457,9 @@ Each result is the median of 5 rounds.
 
 ### Scoped search (2 of 10 branches)
 
-| Pages | Median | Min   | Max   |
-|------:|-------:|------:|------:|
+
+| Pages | Median |   Min |   Max |
+| ----: | -----: | ----: | ----: |
 |   100 |  14 ms |  5 ms | 36 ms |
 |   500 |  16 ms |  7 ms | 19 ms |
 |  1000 |   9 ms |  8 ms | 12 ms |
@@ -1438,12 +1469,13 @@ Routing keeps latency nearly flat across corpus sizes — the search is bounded 
 
 ### Full-corpus search (no routing)
 
-| Pages | Median | Min   | Max    |
-|------:|-------:|------:|-------:|
-|   100 |   7 ms |  6 ms |  32 ms |
-|   500 |  14 ms | 14 ms |  16 ms |
-|  1000 |  22 ms | 21 ms |  31 ms |
-| 10000 | 191 ms |184 ms | 210 ms |
+
+| Pages | Median |    Min |    Max |
+| ----: | -----: | -----: | -----: |
+|   100 |   7 ms |   6 ms |  32 ms |
+|   500 |  14 ms |  14 ms |  16 ms |
+|  1000 |  22 ms |  21 ms |  31 ms |
+| 10000 | 191 ms | 184 ms | 210 ms |
 
 Full-corpus BM25 scales roughly linearly with page count. At 10000 pages the median is 191 ms — comfortably within a 500 ms interactive budget.
 
