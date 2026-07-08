@@ -51,11 +51,14 @@ def main() -> None:
     msg = f"wiki: ingest {source_name} → {summary}"
 
     # Stage all changes under wiki/
-    subprocess.run(
+    add_result = subprocess.run(
         ["git", "-C", wiki_root, "add", "wiki/"],
-        check=True,
         capture_output=True,
+        text=True,
     )
+    if add_result.returncode != 0:
+        print(f"git-auto-commit error: {add_result.stderr.strip()}", file=sys.stderr)
+        sys.exit(1)
 
     # Commit — tolerate "nothing to commit" gracefully
     result = subprocess.run(
